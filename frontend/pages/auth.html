@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistema de Drinks</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/main.css">
-    <style>
-        .auth-container { max-width: 400px; margin: 100px auto; }
-        .tab-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 10px; }
-        .tab-btn.active { color: var(--accent-color); border-bottom: 2px solid var(--accent-color); }
-    </style>
+    <link rel="stylesheet" href="../assets/css/login.css">
 </head>
+
 <body>
     <div class="auth-container card">
-        <div style="display: flex; justify-content: space-around; margin-bottom: 20px;">
+        <div class="auth-header">
+            <span class="auth-kicker">Sistema de Drinks</span>
+            <h1 class="auth-heading">Acesse seu receituario</h1>
+        </div>
+
+        <div class="tabs-wrap">
             <button id="btn-tab-login" class="tab-btn active" onclick="toggleAuth('login')">Login</button>
             <button id="btn-tab-register" class="tab-btn" onclick="toggleAuth('register')">Cadastro</button>
         </div>
@@ -28,51 +33,12 @@
                 <label>Senha</label>
                 <input type="password" id="password" required>
             </div>
-            <button type="submit" class="btn-save" style="width: 100%;">Confirmar</button>
+            <button type="submit" class="btn-save">Confirmar</button>
+            <p class="auth-helper">Seus dados ficam protegidos com autenticacao por token.</p>
         </form>
     </div>
 
-    <script>
-        const API_BASE_URL = 'http://localhost:3000';
-
-        let mode = 'login';
-        function toggleAuth(m) {
-            mode = m;
-            document.getElementById('auth-title').innerText = m === 'login' ? 'Entrar' : 'Criar Conta';
-            document.getElementById('btn-tab-login').classList.toggle('active', m === 'login');
-            document.getElementById('btn-tab-register').classList.toggle('active', m === 'register');
-        }
-
-        (function redirectIfAlreadyLoggedIn() {
-            const token = localStorage.getItem('token');
-            if (token) {
-                window.location.href = './drinks.html';
-            }
-        })();
-
-        document.getElementById('auth-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/auth/${mode}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await res.json();
-                if (res.ok) {
-                    localStorage.setItem('token', data.token);
-                    window.location.href = './drinks.html';
-                } else {
-                    alert(data.message || 'Falha na autenticação.');
-                }
-            } catch (error) {
-                alert('Não foi possível conectar ao servidor local. Inicie o backend em http://localhost:3000.');
-            }
-        };
+    <script src="../assets/js/login.js"></script>
     </script>
 </body>
 </html>
