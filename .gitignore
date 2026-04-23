@@ -1,0 +1,6 @@
+node_modules/
+backend/node_modules/
+.env
+backend/.env
+data/db.json
+backend/data/db.json

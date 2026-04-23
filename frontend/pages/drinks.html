@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Drinks</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+
+</head>
+
+<body>
+    
+    <div class="dashboard">
+        <div class="card full-width">
+            <div class="header-actions">
+                <h2>Meus Drinks (Receituário)</h2>
+                <div class="drink-actions">
+                    <a href="#modal-cadastro" class="btn-save btn-new" onclick="prepareNewDrink()">+ Novo Drink</a>
+                    <button class="btn-delete-saved" onclick="logout()">Sair</button>
+                </div>
+            </div>
+
+            <div id="saved-drinks-container" class="todo-list">
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-cadastro" class="modal">
+        <div class="modal-content card">
+            <a href="#" class="close-modal" onclick="clearForm()">&times;</a>
+
+            <h2 id="modal-title">Cadastrar Novo Drink</h2>
+
+            <div id="calculator-form">
+                <div class="form-group">
+                    <label>Nome do Drink</label>
+                    <input type="text" id="drink-name" placeholder="Ex: Mai Tai, Negroni...">
+                </div>
+
+                <h3>Bebidas Base (Destilados, Licores, Sucos)</h3>
+                <div id="spirits-container"></div>
+                <button class="btn-add" id="btn-add-spirit">+ Adicionar Bebida</button>
+
+                <datalist id="inventory-list"></datalist>
+
+                <h3>Outros Insumos (Guarnições, Gelo)</h3>
+                <div id="ingredients-container"></div>
+                <button class="btn-add" id="btn-add-ingredient">+ Adicionar Insumo</button>
+
+                <h3>Precificação</h3>
+                <div class="form-group">
+                    <label>Meta de CMV Desejada (%)</label>
+                    <input type="number" id="cmv-input" class="calc-trigger" step="0.1" min="1" value="25">
+                </div>
+
+                <div class="results-panel">
+                    <div class="result-item">
+                        <span>Custo Total:</span>
+                        <strong id="res-total-cost">R$ 0,00</strong>
+                    </div>
+                    <div class="result-item highlight">
+                        <span>Preço Sugerido (Venda):</span>
+                        <strong id="res-suggested-price">R$ 0,00</strong>
+                    </div>
+                    <div class="modal-actions">
+                        <a href="#" class="btn-cancelar" onclick="clearForm()">Cancelar</a>
+                        <button class="btn-save" id="btn-save-drink">Salvar Drink</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/drinks.js"></script>
+</body>
+
+</html>
