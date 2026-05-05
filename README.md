@@ -59,3 +59,18 @@ app/
 ## Observações
 - O backend serve os arquivos estáticos da pasta raiz do projeto.
 - A rota inicial (`/`) redireciona para `frontend/pages/auth.html`.
+
+## Telas do Sistema:
+
+### Login
+![Login](doc_src/Screenshot%202026-05-05%20183418.png)
+
+### Dashboard - Meus Drinks
+![Dashboard](doc_src/Screenshot%202026-05-05%20183429.png)
+
+### Cadastrar Drink
+![Cadastrar Drink](doc_src/Screenshot%202026-05-05%20183447.png)
+
+### Editar Drink
+![Editar Drink](doc_src/Screenshot%202026-05-05%20183507.png)
+
