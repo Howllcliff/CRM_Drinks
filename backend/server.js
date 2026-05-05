@@ -1,41 +1,29 @@
+require('dotenv').config();
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_local_secret_change_me';
 const APP_ROOT = path.resolve(__dirname, '..');
-const DB_PATH = path.join(__dirname, 'data', 'db.json');
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+    console.error("ERRO CRÍTICO: SUPABASE_URL e SUPABASE_ANON_KEY não foram definidos nas variáveis de ambiente (.env).");
+    process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(APP_ROOT));
-
-const ensureDb = () => {
-    const dbDir = path.dirname(DB_PATH);
-    if (!fs.existsSync(dbDir)) {
-        fs.mkdirSync(dbDir, { recursive: true });
-    }
-
-    if (!fs.existsSync(DB_PATH)) {
-        const initial = { users: [], drinks: [] };
-        fs.writeFileSync(DB_PATH, JSON.stringify(initial, null, 2));
-    }
-};
-
-const readDb = () => {
-    ensureDb();
-    return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-};
-
-const writeDb = (db) => {
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-};
 
 const auth = (req, res, next) => {
     const authHeader = req.header('Authorization') || '';
@@ -74,23 +62,22 @@ app.post('/api/auth/register', async (req, res) => {
             return res.status(400).json({ message: 'A senha deve ter pelo menos 6 caracteres.' });
         }
 
-        const db = readDb();
-        const existing = db.users.find((u) => u.email.toLowerCase() === String(email).toLowerCase());
-        if (existing) {
-            return res.status(409).json({ message: 'Este e-mail já está cadastrado.' });
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const { data, error } = await supabase
+            .from('users')
+            .insert([{ email: String(email).toLowerCase(), password_hash: passwordHash }])
+            .select();
+
+        if (error) {
+            console.error('Erro detalhado do Supabase:', error);
+            if (error.code === '23505') { // Unique violation
+                return res.status(409).json({ message: 'Este e-mail já está cadastrado.' });
+            }
+            return res.status(400).json({ message: 'Erro ao cadastrar. Verifique o terminal.' });
         }
 
-        const passwordHash = await bcrypt.hash(password, 10);
-        const user = {
-            id: crypto.randomUUID(),
-            email: String(email).toLowerCase(),
-            passwordHash,
-            createdAt: new Date().toISOString()
-        };
-
-        db.users.push(user);
-        writeDb(db);
-
+        const user = data[0];
         const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
         return res.status(201).json({ token });
     } catch (error) {
@@ -106,13 +93,17 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ message: 'E-mail e senha são obrigatórios.' });
         }
 
-        const db = readDb();
-        const user = db.users.find((u) => u.email.toLowerCase() === String(email).toLowerCase());
-        if (!user) {
+        const { data: users, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', String(email).toLowerCase());
+
+        if (error || !users || users.length === 0) {
             return res.status(401).json({ message: 'Credenciais inválidas.' });
         }
 
-        const validPassword = await bcrypt.compare(password, user.passwordHash);
+        const user = users[0];
+        const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) {
             return res.status(401).json({ message: 'Credenciais inválidas.' });
         }
@@ -124,12 +115,15 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-app.get('/api/drinks', auth, (req, res) => {
+app.get('/api/drinks', auth, async (req, res) => {
     try {
-        const db = readDb();
-        const drinks = db.drinks
-            .filter((drink) => drink.userId === req.user.id)
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        const { data: drinks, error } = await supabase
+            .from('drinks')
+            .select('*')
+            .eq('user_id', req.user.id)
+            .order('date', { ascending: false });
+
+        if (error) throw error;
 
         return res.json(drinks);
     } catch (error) {
@@ -137,7 +131,7 @@ app.get('/api/drinks', auth, (req, res) => {
     }
 });
 
-app.post('/api/drinks', auth, (req, res) => {
+app.post('/api/drinks', auth, async (req, res) => {
     try {
         const { name, cost, price, cmv, spirits, ingredients, date } = req.body;
 
@@ -145,10 +139,8 @@ app.post('/api/drinks', auth, (req, res) => {
             return res.status(400).json({ message: 'Nome e custo válido são obrigatórios.' });
         }
 
-        const db = readDb();
         const newDrink = {
-            id: crypto.randomUUID(),
-            userId: req.user.id,
+            user_id: req.user.id,
             name: String(name).trim(),
             cost: Number(cost) || 0,
             price: Number(price) || 0,
@@ -158,58 +150,67 @@ app.post('/api/drinks', auth, (req, res) => {
             date: date || new Date().toISOString()
         };
 
-        db.drinks.push(newDrink);
-        writeDb(db);
+        const { data, error } = await supabase
+            .from('drinks')
+            .insert([newDrink])
+            .select();
 
-        return res.status(201).json(newDrink);
+        if (error) throw error;
+
+        return res.status(201).json(data[0]);
     } catch (error) {
         return res.status(500).json({ message: 'Erro ao salvar drink.' });
     }
 });
 
-app.put('/api/drinks/:id', auth, (req, res) => {
+app.put('/api/drinks/:id', auth, async (req, res) => {
     try {
         const { id } = req.params;
-        const db = readDb();
-        const index = db.drinks.findIndex((drink) => drink.id === id && drink.userId === req.user.id);
 
-        if (index < 0) {
-            return res.status(404).json({ message: 'Drink não encontrado.' });
-        }
-
-        const current = db.drinks[index];
-        const updatedDrink = {
-            ...current,
-            name: String(req.body.name || current.name).trim(),
+        // Simplified for partial updates, or explicit mapping
+        const updateData = {
+            name: String(req.body.name).trim(),
             cost: Number(req.body.cost) || 0,
             price: Number(req.body.price) || 0,
             cmv: Number(req.body.cmv) || 0,
-            spirits: Array.isArray(req.body.spirits) ? req.body.spirits : current.spirits,
-            ingredients: Array.isArray(req.body.ingredients) ? req.body.ingredients : current.ingredients,
-            date: req.body.date || current.date
+            spirits: Array.isArray(req.body.spirits) ? req.body.spirits : undefined,
+            ingredients: Array.isArray(req.body.ingredients) ? req.body.ingredients : undefined,
+            date: req.body.date
         };
 
-        db.drinks[index] = updatedDrink;
-        writeDb(db);
+        // Remove undefined keys
+        Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
-        return res.json(updatedDrink);
+        const { data, error } = await supabase
+            .from('drinks')
+            .update(updateData)
+            .eq('id', id)
+            .eq('user_id', req.user.id)
+            .select();
+
+        if (error || !data || data.length === 0) {
+            return res.status(404).json({ message: 'Drink não encontrado ou erro ao atualizar.' });
+        }
+
+        return res.json(data[0]);
     } catch (error) {
         return res.status(500).json({ message: 'Erro ao atualizar drink.' });
     }
 });
 
-app.delete('/api/drinks/:id', auth, (req, res) => {
+app.delete('/api/drinks/:id', auth, async (req, res) => {
     try {
         const { id } = req.params;
-        const db = readDb();
-        const index = db.drinks.findIndex((drink) => drink.id === id && drink.userId === req.user.id);
 
-        if (index < 0) {
-            return res.status(404).json({ message: 'Drink não encontrado.' });
+        const { error } = await supabase
+            .from('drinks')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', req.user.id);
+
+        if (error) {
+            return res.status(404).json({ message: 'Drink não encontrado ou erro ao excluir.' });
         }
-
-        db.drinks.splice(index, 1);
-        writeDb(db);
 
         return res.json({ message: 'Drink removido com sucesso.' });
     } catch (error) {
