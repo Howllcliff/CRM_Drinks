@@ -223,3 +223,11 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+// Diz ao Express para servir todos os arquivos estáticos da pasta raiz do projeto
+app.use(express.static(__dirname));
+
+// Redireciona quem acessar a raiz do site (/) para a tela de login
+app.get('/', (req, res) => {
+    res.redirect('/frontend/pages/auth.html');
+});

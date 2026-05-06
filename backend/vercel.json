@@ -3,20 +3,16 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["frontend/**", "assets/**"]
+      }
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/backend/server.js"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/frontend/pages/auth.html",
-      "permanent": false
+      "src": "/(.*)",
+      "dest": "/server.js"
     }
   ]
 }
