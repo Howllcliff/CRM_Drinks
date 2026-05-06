@@ -14,13 +14,14 @@
     {
       "source": "/api/(.*)",
       "destination": "/backend/server.js"
-    }
-  ],
-  "redirects": [
+    },
     {
       "source": "/",
-      "destination": "/frontend/pages/auth.html",
-      "permanent": false
+      "destination": "/frontend/pages/auth.html"
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": "/frontend/assets/"
     }
   ]
 }
