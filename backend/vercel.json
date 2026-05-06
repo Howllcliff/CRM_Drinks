@@ -2,26 +2,21 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/server.js",
+      "src": "server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "frontend/**",
-      "use": "@vercel/static"
     }
   ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/backend/server.js"
-    },
+      "destination": "/server.js"
+    }
+  ],
+  "redirects": [
     {
       "source": "/",
-      "destination": "/frontend/pages/auth.html"
-    },
-    {
-      "source": "/assets/(.*)",
-      "destination": "/frontend/assets/"
+      "destination": "/frontend/pages/auth.html",
+      "permanent": false
     }
   ]
 }
