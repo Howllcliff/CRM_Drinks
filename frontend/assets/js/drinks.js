@@ -5,7 +5,7 @@ const calculateSuggestedPriceMath = (totalCost, cmvPercentage) => {
 };
 
 if (typeof document !== 'undefined') {
-    const API_BASE_URL = window.location.origin;
+    const API_BASE_URL = 'http://localhost:3000';
 
     const spiritsContainer = document.getElementById('spirits-container');
     const ingredientsContainer = document.getElementById('ingredients-container');

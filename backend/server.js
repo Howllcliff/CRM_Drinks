@@ -1,9 +1,9 @@
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config();
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
@@ -42,9 +42,9 @@ const auth = (req, res, next) => {
     }
 };
 
-//app.get('/', (req, res) => {
-    //res.redirect('/frontend/pages/auth.html');
-//});
+app.get('/', (req, res) => {
+    res.redirect('/frontend/pages/auth.html');
+});
 
 app.get('/api/health', (req, res) => {
     res.json({ ok: true, message: 'Servidor online.' });
@@ -221,5 +221,3 @@ app.delete('/api/drinks/:id', auth, async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
-
-module.exports = app;
