@@ -9,8 +9,8 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_local_secret_change_me';
-//const APP_ROOT = path.resolve(__dirname, '..');
-const APP_ROOT = __dirname;
+const APP_ROOT = path.resolve(__dirname, '..');
+//const APP_ROOT = __dirname;
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
