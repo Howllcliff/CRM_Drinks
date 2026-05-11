@@ -1,445 +1,102 @@
-# Documentação Completa do Projeto - Sistema de Drinks
+## 1. Introdução
+Este documento detalha as especificações técnicas, arquiteturais e funcionais do Sistema de Drinks, uma plataforma web projetada para o cadastro de receitas, controle de insumos e cálculo automatizado de precificação baseado em metas de CMV (Custo de Mercadoria Vendida).
 
-## 1. Visão Geral
-
-O **Sistema de Drinks** é uma aplicação web full stack para:
-- cadastro e autenticação de usuários;
-- criação, edição, listagem e exclusão de receitas de drinks;
-- cálculo de custo total e preço sugerido com base em CMV (%).
-
-A aplicação usa:
-- **Backend:** Node.js + Express
-- **Frontend:** HTML, CSS e JavaScript puro
-- **Persistência:** arquivo JSON local (`backend/data/db.json`)
-- **Autenticação:** JWT (JSON Web Token)
+O sistema foi concebido para atender às necessidades de profissionais de mixologia e gestão de bares, permitindo uma visão clara da margem de lucro por produto.
 
 ---
 
-## 2. Estrutura de Pastas
+## 2. Tecnologias Utilizadas
+A solução adota uma stack moderna e escalável, focada em performance e segurança:
 
-```text
-app/
-  README.md
-  documentacao.md
-  backend/
-    .env.example
-    package.json
-    server.js
-    data/
-      db.json
-  frontend/
-    assets/
-      css/
-        main.css
-      js/
-        drinks.js
-    pages/
-      auth.html
-      drinks.html
-```
+| Camada | Tecnologia | Descrição |
+| :--- | :--- | :--- |
+| **Frontend** | HTML5 / CSS3 / JS Vanilla | Interface responsiva e lógica de cliente sem dependências pesadas. |
+| **Backend** | Node.js / Express | Servidor para processamento de regras de negócio e roteamento de API. |
+| **Banco de Dados** | Supabase (PostgreSQL) | Persistência de dados relacional com alta disponibilidade. |
+| **Segurança** | JWT & Bcrypt | Autenticação baseada em tokens e criptografia de senhas. |
 
 ---
 
-## 3. Requisitos
+## 3. Arquitetura do Sistema
+O sistema segue o modelo **Cliente-Servidor**. O frontend comunica-se com o backend através de uma API RESTful, utilizando cabeçalhos de autorização Bearer para rotas protegidas.
 
-- Node.js 18+
-- npm
-
----
-
-## 4. Instalação e Execução Local
-
-1. Acesse a pasta do backend:
-```bash
-cd backend
-```
-
-2. Instale dependências:
-```bash
-npm install
-```
-
-3. Inicie o servidor:
-```bash
-npm start
-```
-
-4. Abra no navegador:
-```text
-http://localhost:3000
-```
-
-Ao acessar `/`, o backend redireciona para:
-- `frontend/pages/auth.html`
+### 3.1. Estrutura de Diretórios
+- `assets/css/`: Folhas de estilo para layout global e login.
+- `assets/js/`: Lógica de autenticação e manipulação de drinks.
+- `pages/`: Interfaces do usuário (`auth.html` e `drinks.html`).
+- `server/`: Código do servidor Node.js (`server.js`).
 
 ---
 
-## 5. Variáveis de Ambiente
+## 4. Requisitos do Sistema
 
-Arquivo de exemplo:
-- `backend/.env.example`
+### 4.1. Requisitos Funcionais (RF)
+| ID | Descrição |
+| :--- | :--- |
+| **RF-01** | O sistema deve permitir o cadastro e login de usuários com validação de credenciais. |
+| **RF-02** | O usuário autenticado deve ser capaz de criar, editar e excluir drinks de seu próprio receituário. |
+| **RF-03** | O sistema deve calcular o custo total do drink somando insumos e doses de bebidas. |
+| **RF-04** | O sistema deve sugerir um preço de venda com base na meta de CMV informada. |
+| **RF-05** | O sistema deve oferecer um inventário local (datalist) para autocompletar preços de bebidas já cadastradas. |
 
-Variáveis disponíveis:
-- `PORT`: porta HTTP do servidor (padrão: `3000`)
-- `JWT_SECRET`: segredo para assinatura de tokens JWT
-
-### Comportamento atual
-No código, caso variáveis não sejam definidas, o backend usa fallback:
-- `PORT || 3000`
-- `JWT_SECRET || 'dev_local_secret_change_me'`
-
-### Recomendação para produção
-- definir `JWT_SECRET` forte e único;
-- não usar segredos padrão.
+### 4.2. Requisitos Não Funcionais (RNF)
+- **Segurança**: Senhas devem ser armazenadas apenas como hashes Bcrypt.
+- **Sessão**: Autenticação via JSON Web Token (JWT) com expiração de 7 dias.
+- **Responsividade**: A interface deve ser adaptável a dispositivos móveis através de media queries.
 
 ---
 
-## 6. Backend
+## 5. Modelo de Dados
+A persistência é realizada no Supabase. Abaixo estão as definições lógicas das entidades:
 
-### 6.1 Dependências
-No `backend/package.json`:
-- `express`: servidor HTTP e roteamento
-- `cors`: habilita requisições cross-origin
-- `bcryptjs`: hash e validação de senha
-- `jsonwebtoken`: geração/validação de token JWT
+### Tabela: `users`
+- `id`: UUID (Chave Primária)
+- `email`: String (Único, formato minúsculo)
+- `password_hash`: String (Criptografada)
 
-### 6.2 Arquitetura (`backend/server.js`)
-
-Principais pontos:
-- inicializa Express e middlewares (`cors`, `express.json`, `express.static`);
-- serve arquivos estáticos da raiz do projeto;
-- cria e mantém o arquivo de banco local (`db.json`) automaticamente;
-- valida autenticação com middleware `auth` via header `Authorization: Bearer <token>`;
-- expõe endpoints de saúde, autenticação e CRUD de drinks.
-
-### 6.3 Persistência Local
-
-O banco local fica em:
-- `backend/data/db.json`
-
-Estrutura principal:
-- `users[]`
-- `drinks[]`
-
-Leitura/escrita:
-- `readDb()`: lê JSON do arquivo
-- `writeDb(db)`: sobrescreve arquivo com JSON formatado
-- `ensureDb()`: garante pasta/arquivo existentes
-
-> Observação: é uma persistência simples e adequada para estudo/local. Em produção, recomenda-se banco de dados gerenciado.
+### Tabela: `drinks`
+- `id`: UUID (Chave Primária)
+- `user_id`: UUID (Chave Estrangeira para `users`)
+- `name`: String (Nome do drink)
+- `cost`: Numeric (Custo total calculado)
+- `price`: Numeric (Preço de venda sugerido)
+- `cmv`: Numeric (Porcentagem de CMV aplicada)
+- `spirits`: JSONB (Array de objetos contendo nome, preço, volume e dose)
+- `ingredients`: JSONB (Array de objetos contendo nome e custo fixo)
+- `date`: Timestamp
 
 ---
 
-## 7. Frontend
+## 6. Lógica de Precificação
+A regra de negócio central reside na função de cálculo de CMV. O preço de venda é determinado pela fórmula:
 
-### 7.1 Páginas
+`Preço Sugerido = Custo Total / (Meta de CMV / 100)`
 
-- `frontend/pages/auth.html`
-  - tela com abas de Login e Cadastro;
-  - envia credenciais para backend;
-  - salva token no `localStorage`;
-  - redireciona para `drinks.html` quando autenticado.
-
-- `frontend/pages/drinks.html`
-  - dashboard de receitas salvas;
-  - modal para criar/editar drink;
-  - botões para editar, excluir e sair.
-
-### 7.2 Estilos
-
-- `frontend/assets/css/main.css`
-  - tema escuro;
-  - estilos de cards, formulários, modal e lista de drinks;
-  - classes utilitárias para ações de salvar/editar/excluir.
-
-### 7.3 Lógica de Interface e Regras
-
-- `frontend/assets/js/drinks.js`
-
-Funcionalidades principais:
-- cálculo de custo e preço sugerido;
-- carregamento de drinks do backend;
-- criação, edição e exclusão via API;
-- controle de sessão por token;
-- inventário local de bebidas (via `localStorage`) para autocomplete.
-
-Função matemática central:
-- `calculateSuggestedPriceMath(totalCost, cmvPercentage)`
-
-Fórmula utilizada:
-
-$$
-preco\_sugerido = \frac{custo\_total}{cmv/100}
-$$
-
-Exemplo:
-- custo total = R$ 10,00
-- CMV = 25%
-- preço sugerido = $10 / 0.25 = 40$
+Onde o **Custo Total** é a soma de:
+1. **Custo do Líquido**: `(Preço da Garrafa / Volume Total) * Dose Utilizada`.
+2. **Custo de Insumos**: Soma dos custos fixos de guarnições e gelo.
 
 ---
 
-## 8. Fluxo de Uso da Aplicação
+## 7. Endpoints da API (REST)
 
-1. Usuário acessa `/`.
-2. Backend redireciona para tela de autenticação.
-3. Usuário faz cadastro ou login.
-4. Frontend recebe `token` e salva no `localStorage`.
-5. Usuário acessa a tela de drinks.
-6. Frontend envia token no header `Authorization`.
-7. Backend filtra drinks pelo `userId` do token.
-8. Usuário cria/edita/exclui receitas.
+### Autenticação
+- `POST /api/auth/register`: Cadastro de novo usuário.
+- `POST /api/auth/login`: Autenticação e geração de token.
 
----
-
-## 9. API REST - Endpoints
-
-Base URL local:
-- `http://localhost:3000`
-
-### 9.1 Saúde
-
-#### `GET /api/health`
-Retorna status do servidor.
-
-Resposta (200):
-```json
-{
-  "ok": true,
-  "message": "Servidor online."
-}
-```
+### Drinks (Requer Header: `Authorization: Bearer <token>`)
+- `GET /api/drinks`: Lista todos os drinks do usuário logado.
+- `POST /api/drinks`: Cadastra um novo drink.
+- `PUT /api/drinks/:id`: Atualiza um drink existente.
+- `DELETE /api/drinks/:id`: Remove um drink do sistema.
 
 ---
 
-### 9.2 Autenticação
+## 8. Considerações de Segurança
+1. **Middleware de Autenticação**: Todas as rotas de manipulação de dados passam por uma função que verifica a validade do token JWT.
+2. **Prevenção de XSS**: A interface realiza o escape de strings antes de renderizá-las no dashboard.
+3. **Isolamento de Dados**: Toda consulta ao banco de dados inclui o filtro `user_id`, garantindo que um usuário nunca acesse dados de terceiros.
+"""
 
-#### `POST /api/auth/register`
-Cria usuário e retorna token.
-
-Body:
-```json
-{
-  "email": "usuario@email.com",
-  "password": "123456"
-}
-```
-
-Regras:
-- email obrigatório
-- senha obrigatória
-- senha com mínimo de 6 caracteres
-- email único
-
-Resposta (201):
-```json
-{
-  "token": "jwt_token"
-}
-```
-
-Erros comuns:
-- `400`: dados inválidos
-- `409`: email já cadastrado
-- `500`: erro interno
-
-#### `POST /api/auth/login`
-Autentica usuário existente e retorna token.
-
-Body:
-```json
-{
-  "email": "usuario@email.com",
-  "password": "123456"
-}
-```
-
-Resposta (200):
-```json
-{
-  "token": "jwt_token"
-}
-```
-
-Erros comuns:
-- `400`: campos ausentes
-- `401`: credenciais inválidas
-- `500`: erro interno
-
----
-
-### 9.3 Drinks (Autenticado)
-
-Todos os endpoints abaixo exigem header:
-```http
-Authorization: Bearer <token>
-```
-
-#### `GET /api/drinks`
-Lista drinks do usuário autenticado.
-
-Resposta (200):
-```json
-[
-  {
-    "id": "uuid",
-    "userId": "uuid",
-    "name": "Negroni",
-    "cost": 14.6,
-    "price": 41.71,
-    "cmv": 35,
-    "spirits": [],
-    "ingredients": [],
-    "date": "2026-04-23T18:35:17.309Z"
-  }
-]
-```
-
-#### `POST /api/drinks`
-Cria um novo drink.
-
-Body:
-```json
-{
-  "name": "Negroni",
-  "cost": 14.6,
-  "price": 41.71,
-  "cmv": 35,
-  "spirits": [
-    { "name": "Gin", "price": "120", "volume": "750", "dose": "30" }
-  ],
-  "ingredients": [
-    { "name": "Gelo", "cost": "3" }
-  ],
-  "date": "2026-04-23T18:35:17.309Z"
-}
-```
-
-Regras:
-- `name` obrigatório
-- `cost` deve ser maior que 0
-
-Resposta (201): objeto do drink criado
-
-#### `PUT /api/drinks/:id`
-Atualiza drink do usuário autenticado.
-
-Body: mesmo formato de criação (campos atualizáveis).
-
-Resposta (200): objeto atualizado
-
-Erros comuns:
-- `404`: drink não encontrado
-
-#### `DELETE /api/drinks/:id`
-Exclui drink do usuário autenticado.
-
-Resposta (200):
-```json
-{
-  "message": "Drink removido com sucesso."
-}
-```
-
-Erros comuns:
-- `404`: drink não encontrado
-
----
-
-## 10. Modelo de Dados
-
-### 10.1 Usuário
-
-```json
-{
-  "id": "uuid",
-  "email": "string",
-  "passwordHash": "string",
-  "createdAt": "ISODate"
-}
-```
-
-### 10.2 Drink
-
-```json
-{
-  "id": "uuid",
-  "userId": "uuid",
-  "name": "string",
-  "cost": "number",
-  "price": "number",
-  "cmv": "number",
-  "spirits": [
-    {
-      "name": "string",
-      "price": "string|number",
-      "volume": "string|number",
-      "dose": "string|number"
-    }
-  ],
-  "ingredients": [
-    {
-      "name": "string",
-      "cost": "string|number"
-    }
-  ],
-  "date": "ISODate"
-}
-```
-
----
-
-## 11. Segurança e Limitações Atuais
-
-### Pontos positivos
-- senhas armazenadas com hash (`bcrypt`);
-- rotas de drinks protegidas por JWT;
-- cada usuário só acessa seus próprios drinks.
-
-### Limitações
-- banco em arquivo local não é ideal para concorrência/escala;
-- fallback de segredo JWT deve ser evitado em produção;
-- dados de inventário no frontend ficam em `localStorage`.
-
----
-
-## 12. Deploy e Evolução Recomendada
-
-Para ambiente de produção:
-- migrar persistência para banco real (PostgreSQL, MongoDB etc.);
-- configurar variáveis de ambiente seguras;
-- restringir CORS para domínio oficial;
-- adicionar logs estruturados e monitoramento;
-- incluir testes automatizados (unitários e integração);
-- considerar refresh token e política de logout mais robusta.
-
----
-
-## 13. Scripts Disponíveis
-
-No backend (`backend/package.json`):
-- `npm start` -> inicia servidor (`node server.js`)
-- `npm run dev` -> atualmente igual ao start (`node server.js`)
-
----
-
-## 14. Troubleshooting Rápido
-
-### Não abre no navegador
-- confirme que o backend está rodando em `http://localhost:3000`.
-
-### Erro de autenticação / sessão expirada
-- faça logout e login novamente;
-- confira se `JWT_SECRET` não foi alterado entre emissões de token.
-
-### Erro ao salvar drink
-- verifique se `name` está preenchido e se `cost > 0`.
-
-### Falha ao escrever no banco local
-- confirme permissão de escrita em `backend/data/`.
-
----
-
-## 15. Resumo Final
-
-Este projeto implementa um fluxo completo de autenticação e CRUD de drinks com cálculo de precificação baseado em CMV, utilizando stack simples para aprendizado e execução local. A base está pronta para evolução para ambientes de produção com troca da camada de persistência e fortalecimento de segurança operacional.
+with open("documentacao.md", "w", encoding="utf-8") as f:
+    f.write(md_content)

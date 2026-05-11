@@ -1,76 +1,59 @@
-# Sistema de Drinks - Execução Local
+content = """# Sistema de Receituário e Precificação de Drinks 🍸
 
-## Estrutura do projeto
-```
-app/
-   backend/
-      data/
-         db.json
-      server.js
-      package.json
-   frontend/
-      pages/
-         auth.html
-         drinks.html
-      assets/
-         css/
-            main.css
-         js/
-            drinks.js
-```
+Este é um sistema completo de gestão para profissionais de coquetelaria, permitindo o registo detalhado de receitas, cálculo de custos de produção e definição de preços de venda com base na meta de CMV (Custo de Mercadoria Vendida).
 
-## Requisitos
-- Node.js 18+
-- npm
+## 🚀 Funcionalidades Principal
 
-## Como rodar localmente
-1. Entre na pasta do backend:
-   cd backend
-2. Instale as dependências:
-   npm install
-3. Inicie o servidor:
-   npm start
-4. Abra no navegador:
-   http://localhost:3000
+* **Autenticação Segura**: Registo e login de utilizadores com senhas criptografadas (Bcrypt) e sessões via JWT (JSON Web Tokens).
+* **Calculadora de CMV em Tempo Real**: Cálculo dinâmico do custo por dose com base no valor da garrafa e volume utilizado.
+* **Gestão de Receituário (CRUD)**: Criação, listagem, edição e exclusão de drinks personalizados.
+* **Memória de Inventário**: O sistema "aprende" os preços das bebidas base inseridas, facilitando novos registos através de preenchimento automático.
+* **Design Responsivo**: Interface optimizada para uso em computadores e dispositivos móveis (tablets/smartphones).
 
-## Fluxo
-- Crie sua conta na tela de cadastro.
-- Faça login.
-- O sistema redireciona para o receituário.
-- Drinks são salvos por usuário no arquivo local `backend/data/db.json`.
+## 🛠️ Tecnologias Utilizadas
 
-## Estrutura de API
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `GET /api/drinks` (autenticada)
-- `POST /api/drinks` (autenticada)
-- `PUT /api/drinks/:id` (autenticada)
-- `DELETE /api/drinks/:id` (autenticada)
-- `GET /api/health`
+### Frontend
+* **HTML5 & CSS3**: Estrutura e estilização moderna com uso de variáveis CSS e flexbox/grid.
+* **JavaScript (Vanilla)**: Lógica de interface, manipulação do DOM e consumo de API sem dependências externas.
+* **LocalStorage**: Persistência local para cache de inventário.
 
-## Preparação para nuvem
-1. Definir variáveis de ambiente:
-   - `PORT`
-   - `JWT_SECRET`
-2. Trocar persistência local de arquivo (`backend/data/db.json`) por banco gerenciado (MongoDB Atlas, PostgreSQL, etc.).
-3. Configurar CORS para seu domínio em produção.
-4. Usar HTTPS e segredo forte para JWT.
+### Backend
+* **Node.js & Express**: Servidor e roteamento de API RESTful.
+* **Supabase (PostgreSQL)**: Persistência de dados em nuvem e gestão de utilizadores.
+* **JWT & Bcrypt**: Camadas de segurança para autenticação e protecção de dados sensíveis.
 
-## Observações
-- O backend serve os arquivos estáticos da pasta raiz do projeto.
-- A rota inicial (`/`) redireciona para `frontend/pages/auth.html`.
+## 📦 Como Instalar e Executar
 
-## Telas do Sistema:
+### Pré-requisitos
+* [Node.js](https://nodejs.org/) instalado.
+* Conta no [Supabase](https://supabase.com/) com um projecto configurado.
 
-### Login
-![Login](doc_src/Screenshot%202026-05-05%20183418.png)
+### Passo a Passo
 
-### Dashboard - Meus Drinks
-![Dashboard](doc_src/Screenshot%202026-05-05%20183429.png)
+1.  **Clonar o repositório:**
+    ```bash
+    git clone <url-do-repositorio>
+    cd <pasta-do-projecto>
+    ```
 
-### Cadastrar Drink
-![Cadastrar Drink](doc_src/Screenshot%202026-05-05%20183447.png)
+2.  **Instalar as dependências:**
+    ```bash
+    npm install
+    ```
 
-### Editar Drink
-![Editar Drink](doc_src/Screenshot%202026-05-05%20183507.png)
 
+4.  **Iniciar o Servidor:**
+    ```bash
+    npm start
+    ```
+    O servidor estará disponível em `http://localhost:3000`.
+
+## 📖 Estrutura de Pastas
+
+```text
+├── assets/             # Ficheiros estáticos (CSS, JS do Frontend)
+│   ├── css/            # Estilização global e específica
+│   └── js/             # Lógica do frontend (drinks.js, login.js)
+├── pages/              # Páginas HTML (auth.html, drinks.html)
+├── server.js           # Servidor backend (Node.js/Express)
+└── .env                # Variáveis de ambiente (não incluído no git)
