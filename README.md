@@ -5,7 +5,7 @@
 Uma aplicação de interface gráfica moderna focada na eficiência operacional do setor de bar. Esta ferramenta permite a criação de fichas técnicas padronizadas, cálculo automático de custos e precificação baseada na meta de **CMV (Custo da Mercadoria Vendida)**, além de manter um receituário digital salvo localmente.
 
 
-## 🚀 O Projeto
+## O Projeto
 
 A gestão de custos em um bar exige precisão. Este sistema foi desenvolvido para resolver o problema de cálculos manuais e erros na hora de criar novos coquetéis ou atualizar preços. Através de uma interface web simples e de tema escuro (para conforto visual em ambientes de pouca luz), a ferramenta entrega agilidade e previsibilidade de lucros para o salão.
 
@@ -19,7 +19,7 @@ A gestão de custos em um bar exige precisão. Este sistema foi desenvolvido par
 
 ---
 
-## 🧮 As Fórmulas (Como o cálculo é feito)
+## As Fórmulas (Como o cálculo é feito)
 
 A lógica matemática do sistema garante que a precificação seja exata e proteja a margem de lucro.
 
@@ -77,7 +77,7 @@ $$Preço_{sugerido} = \frac{Custo_{total}}{\left( \frac{CMV_{meta}}{100} \right)
     ```
     O servidor estará disponível em `http://localhost:3000`.
 
-## 📖 Estrutura de Pastas
+## Estrutura de Pastas
 
 ```text
 ├── assets/             # Ficheiros estáticos (CSS, JS do Frontend)
