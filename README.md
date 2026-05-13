@@ -55,7 +55,7 @@ $$Preço_{sugerido} = \frac{Custo_{total}}{\left( \frac{CMV_{meta}}{100} \right)
 
 ### Pré-requisitos
 * [Node.js](https://nodejs.org/) instalado.
-* Conta no [Supabase](https://supabase.com/) com um projecto configurado.
+* Conta no [Supabase](https://supabase.com/) com um projeto configurado.
 
 ### Passo a Passo
 
