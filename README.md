@@ -86,3 +86,18 @@ $$Preço_{sugerido} = \frac{Custo_{total}}{\left( \frac{CMV_{meta}}{100} \right)
 ├── pages/              # Páginas HTML (auth.html, drinks.html)
 ├── server.js           # Servidor backend (Node.js/Express)
 └── .env                # Variáveis de ambiente (não incluído no git)
+```
+
+## Telas do sistema
+
+Tela de Login
+![Login](doc_src/Screenshot%202026-05-05%20183418.png)
+
+Tela de Cadastros
+![Cadastros exemplos](doc_src/Screenshot%202026-05-05%20183429.png)
+
+Modal de Cadastro
+![Modal de Cadastro](doc_src/Screenshot%202026-05-05%20183447.png)
+
+Exemplo de Cadastro
+![Exemplo 4](doc_src/Screenshot%202026-05-05%20183507.png)
