@@ -1,6 +1,6 @@
 # 🍸 Calculadora de Ficha Técnica de Drinks
 
-[![Versão](https://img.shields.io/badge/versão-0.1.0-blue.svg)](https://semver.org/)
+[![Versão](https://img.shields.io/badge/versão-0.3.6-blue.svg)](https://semver.org/)
 
 Uma aplicação de interface gráfica moderna focada na eficiência operacional do setor de bar. Esta ferramenta permite a criação de fichas técnicas padronizadas, cálculo automático de custos e precificação baseada na meta de **CMV (Custo da Mercadoria Vendida)**, além de manter um receituário digital salvo localmente.
 
