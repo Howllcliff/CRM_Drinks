@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "jest",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",
